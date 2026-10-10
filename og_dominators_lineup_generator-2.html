@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OG Dominators — Batting Lineup Generator</title>
+<style>
+:root{--ink:#211c18;--gold:#b77921;--cream:#fff4df;--paper:#fffdf8;--muted:#82796d;--line:#e9ddc8;--red:#c51e2b}
+*{box-sizing:border-box}body{margin:0;background:#f3efe8;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:20px}.top{background:#211c18;color:#fff7e8;border-radius:20px;padding:24px;display:flex;gap:16px;align-items:center;box-shadow:0 8px 24px #0001}
+.crest{width:68px;height:68px;border:2px solid #d6a64f;border-radius:16px;display:grid;place-items:center;font-size:31px;background:#33241b;flex-shrink:0}
+h1{margin:0;font-size:clamp(23px,4vw,34px);letter-spacing:.02em}.sub{color:#e7c990;margin-top:5px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:18px;margin-top:18px}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 3px 12px #00000008}
+h2{font-size:18px;margin:0 0 14px}label{font-size:13px;font-weight:700;color:#655b50;display:block;margin:10px 0 5px}
+input,select{width:100%;padding:11px 12px;border:1px solid #d8cdbd;border-radius:9px;background:#fffdf9;font:inherit;color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button,.filebtn{border:0;border-radius:9px;padding:11px 14px;font-weight:750;font-size:13px;cursor:pointer;background:#28211b;color:white}
+button.gold{background:#b77921;color:white}button.light,.filebtn{background:#f3eadb;color:#4b3824}button.red{background:#a51c28}
+.small{font-size:12px;color:var(--muted);line-height:1.5}.playerlist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.player{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:9px;align-items:center;background:#fffdf9}
+.player input[type=checkbox]{width:18px;height:18px;accent-color:#b77921}.pname{font-weight:750}.stats{font-size:12px;color:#74695d;margin-top:3px}
+.rank{font-weight:850;color:#a45c0e;font-family:Georgia,serif;white-space:nowrap}.tag{font-size:10px;font-weight:800;background:#f5e4c4;padding:3px 6px;border-radius:5px;margin-left:5px}
+.poster{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;min-height:400px}
+.posterhead{display:flex;align-items:center;gap:12px;border-bottom:2px solid #e8d8b9;padding-bottom:15px}
+.posterhead .crest{width:54px;height:54px;font-size:24px}.poster h2{font-family:Georgia,serif;font-size:22px;letter-spacing:.06em;margin:0}.poster .sub{color:#9c6b2a;font-weight:800;letter-spacing:.18em;font-size:11px}
+.posterTitle{display:flex;justify-content:space-between;align-items:center;margin:18px 0 12px;font-family:Georgia,serif;font-weight:800}
+.lineup{display:flex;flex-direction:column;gap:8px}.slot{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;background:#fff0d7;border:1px solid #efdfc4;border-radius:11px;padding:12px}
+.num{width:30px;height:30px;border-radius:50%;background:#f1d6a4;display:grid;place-items:center;font-weight:800;color:#78501b}
+.slot:nth-child(n+4){background:#f8f4ed}.slot:nth-child(n+4) .num{background:#ebe3d2;color:#6b604d}
+.slotname{font-weight:800}.slotstats{font-size:12px;color:#786b5c;margin-top:4px}.sr{font-family:Georgia,serif;color:#9d5a0d;font-weight:900;font-size:20px;white-space:nowrap}
+.empty{padding:30px 10px;text-align:center;color:#887c6d}
+.footer{margin-top:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;color:#8a7f70}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.wrap{padding:12px}.top{padding:18px}.poster{padding:14px}}
+@media print{body{background:white}.wrap{max-width:none;padding:0}.top,.controls,.editpanel,.noprint{display:none!important}.layout{display:block;margin:0}.panel{border:0;box-shadow:none;padding:0}.poster{border:0;padding:12mm;min-height:0}.slot{break-inside:avoid}.footer{margin-top:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="crest">🏏</div>
+  <div><h1>OG DOMINATORS</h1><div class="sub">BATTING ORDER · OPTIMIZED LINEUP</div><div class="small" style="color:#d8cbb6;margin-top:7px">Hyderabad, Telangana · CricHeroes team 12296411</div></div>
+</header>
+<div class="layout">
+<section class="panel controls">
+<h2>1. Match setup</h2>
+<label for="match">Match / opponent</label><input id="match" placeholder="e.g. Sunday match vs Thunder XI">
+<div class="row"><div><label for="format">Format</label><select id="format"><option>T20</option><option>15 Overs</option><option>10 Overs</option><option>30 Overs</option><option>Custom</option></select></div><div><label for="captain">Captain</label><input id="captain" placeholder="Captain name"></div></div>
+<div class="buttons"><button class="gold" onclick="sortPlayers()">Optimize batting order</button><button class="light" onclick="window.print()">Print / Save PDF</button></div>
+<p class="small">Default ranking prioritizes strike rate, then batting average. You can drag players using the up/down buttons to make a tactical adjustment.</p>
+<h2 style="margin-top:22px">2. Squad and statistics</h2>
+<div class="row"><div><label for="pname">Player name</label><input id="pname" placeholder="Player name"></div><div><label for="psr">Strike rate</label><input id="psr" type="number" min="0" step=".1" placeholder="e.g. 125"></div></div>
+<div class="row"><div><label for="pavg">Batting average</label><input id="pavg" type="number" min="0" step=".1" placeholder="e.g. 18.5"></div><div><label for="role">Role</label><select id="role"><option>Batter</option><option>Opener</option><option>All-rounder</option><option>Wicketkeeper</option><option>Bowler</option></select></div></div>
+<div class="buttons"><button onclick="addPlayer()">Add player</button><button class="light" onclick="loadSample()">Load example squad</button><button class="light" onclick="document.getElementById('csvfile').click()">Import CSV</button><input id="csvfile" type="file" accept=".csv,text/csv" hidden onchange="importCSV(event)"></div>
+<p class="small">CSV columns: name,strikeRate,average,selected,role. Select the players who are available for this match. Data stays in this browser unless you export it.</p>
+<div id="players" class="playerlist"></div>
+<div class="buttons"><button class="gold" onclick="exportCSV()">Export player data</button><button class="red" onclick="clearPlayers()">Clear all</button></div>
+</section>
+<section class="panel editpanel">
+<h2>Lineup poster preview</h2>
+<div class="poster" id="poster">
+<div class="posterhead"><div class="crest">🏏</div><div><h2>OG DOMINATORS</h2><div class="sub">BATTING ORDER</div><div class="small" id="posterSub">OPTIMIZED LINEUP</div></div></div>
+<div class="posterTitle"><span>BATTING ORDER</span><span style="font-family:Arial,sans-serif;font-size:10px;color:#8a7b65">SR + AVG</span></div>
+<div class="lineup" id="lineup"><div class="empty">Add players or load an example squad to build your lineup.</div></div>
+<div class="footer"><span>OG Dominators · Hyderabad</span><span>Stats must be verified against CricHeroes scorecards</span></div>
+</div>
+<div class="buttons noprint"><button class="gold" onclick="downloadPoster()">Download poster image</button><button class="light" onclick="sharePoster()">Share lineup text</button></div>
+<p class="small">The poster is generated from the squad and statistics you enter. Automatic CricHeroes retrieval is not connected in this starter version; public pages or third-party access can change, so no player stats are fabricated.</p>
+</section>
+</div>
+<p class="small" style="text-align:center;margin:20px 0">CricHeroes team: <a href="https://cricheroes.com/team-profile/12296411/OG-Dominators" target="_blank" rel="noopener">Open OG Dominators profile</a></p>
+</div>
+<script>
+let players=[];
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function addPlayer(){let name=$('pname').value.trim();if(!name){alert('Enter a player name first.');return}players.push({name,sr:Number($('psr').value)||0,avg:Number($('pavg').value)||0,role:$('role').value,selected:true});$('pname').value='';$('psr').value='';$('pavg').value='';render();}
+function render(){
+$('players').innerHTML=players.map((p,i)=>`<div class="player"><input type="checkbox" ${p.selected?'checked':''} aria-label="Select ${esc(p.name)}" onchange="toggle(${i},this.checked)"><div><div class="pname">${esc(p.name)} <span class="tag">${esc(p.role||'Player')}</span></div><div class="stats">SR ${Number(p.sr).toFixed(1)} · Avg ${Number(p.avg).toFixed(1)}</div></div><div style="display:flex;gap:4px"><button class="light" title="Move up" onclick="move(${i},-1)">↑</button><button class="light" title="Move down" onclick="move(${i},1)">↓</button><button class="red" title="Remove" onclick="removePlayer(${i})">×</button></div></div>`).join('')||'<div class="empty">No players added yet.</div>';
+$('posterSub').textContent=(($('match').value.trim()||'OPTIMIZED LINEUP')+' · '+$('format').value).toUpperCase();
+let chosen=players.filter(p=>p.selected);
+$('lineup').innerHTML=chosen.length?chosen.map((p,i)=>`<div class="slot"><div class="num">${i+1}</div><div><div class="slotname">${esc(p.name)}</div><div class="slotstats">${esc(p.role||'Player')} · Avg ${Number(p.avg).toFixed(1)}</div></div><div class="sr">SR: ${Number(p.sr).toFixed(0)}</div></div>`).join(''):'<div class="empty">Select at least one player for the match squad.</div>';
+}
+function toggle(i,v){players[i].selected=v;render()}
+function move(i,d){let j=i+d;if(j<0||j>=players.length)return;[players[i],players[j]]=[players[j],players[i]];render()}
+function removePlayer(i){players.splice(i,1);render()}
+function sortPlayers(){let chosen=players.filter(p=>p.selected).sort((a,b)=>b.sr-a.sr||b.avg-a.avg);let rest=players.filter(p=>!p.selected);players=[...chosen,...rest];render()}
+function clearPlayers(){if(confirm('Remove all players from this browser session?')){players=[];render()}}
+function loadSample(){players=[
+{name:'Uday',sr:118,avg:22.4,role:'All-rounder',selected:true},
+{name:'Siva',sr:156,avg:17.5,role:'Opener',selected:true},
+{name:'Phani',sr:129,avg:19.2,role:'Batter',selected:true},
+{name:'Ramdas',sr:124,avg:26.4,role:'Batter',selected:true},
+{name:'Chaitanya',sr:112,avg:18.6,role:'All-rounder',selected:true},
+{name:'Bhavan',sr:105,avg:15.5,role:'Batter',selected:true},
+{name:'Satish',sr:98,avg:21.0,role:'Batter',selected:true},
+{name:'Venky',sr:92,avg:14.2,role:'Bowler',selected:true},
+{name:'Rohit',sr:110,avg:16.1,role:'All-rounder',selected:true},
+{name:'Ganesh',sr:86,avg:10.5,role:'Bowler',selected:true},
+{name:'Laxmi',sr:90,avg:12.0,role:'Bowler',selected:true},
+{name:'Aditya',sr:75,avg:8.0,role:'Bowler',selected:false}
+];render()}
+function importCSV(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{let lines=String(r.result).split(/\r?\n/).filter(x=>x.trim());if(lines.length&&/name/i.test(lines[0]))lines.shift();players=lines.map(line=>{let c=line.split(',').map(x=>x.trim());return{name:c[0]||'Player',sr:Number(c[1])||0,avg:Number(c[2])||0,selected:!['false','0','no'].includes((c[3]||'true').toLowerCase()),role:c[4]||'Batter'}});render()};r.readAsText(f);e.target.value=''}
+function exportCSV(){let csv='name,strikeRate,average,selected,role\n'+players.map(p=>[p.name,p.sr,p.avg,p.selected,p.role].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');downloadBlob(csv,'og-dominators-players.csv','text/csv;charset=utf-8')}
+function downloadBlob(data,name,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function downloadPoster(){let selected=players.filter(p=>p.selected);if(!selected.length){alert('Select players first.');return}
+let title=($('match').value.trim()||'OPTIMIZED LINEUP')+' · '+$('format').value;
+let rows=selected.map((p,i)=>`<div class="slot"><div class="num">${i+1}</div><div><div class="slotname">${esc(p.name)}</div><div class="slotstats">${esc(p.role||'Player')} · Avg ${Number(p.avg).toFixed(1)}</div></div><div class="sr">SR: ${Number(p.sr).toFixed(0)}</div></div>`).join('');
+let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${260+selected.length*82}" viewBox="0 0 900 ${260+selected.length*82}"><rect width="100%" height="100%" rx="20" fill="#fffdf8"/><text x="44" y="58" font-size="16" font-weight="bold" letter-spacing="4" fill="#a56a20">OG DOMINATORS</text><text x="44" y="94" font-size="31" font-family="Georgia" font-weight="bold" fill="#211c18">BATTING ORDER</text><text x="44" y="123" font-size="14" fill="#8c6b3d">${esc(title).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</text><line x1="44" y1="145" x2="856" y2="145" stroke="#e8d8b9" stroke-width="2"/>${selected.map((p,i)=>{let y=164+i*82;return `<rect x="35" y="${y}" width="830" height="70" rx="12" fill="${i<3?'#fff0d7':'#f8f4ed'}" stroke="#eadcc5"/><circle cx="70" cy="${y+35}" r="17" fill="${i<3?'#f1d6a4':'#ebe3d2'}"/><text x="70" y="${y+41}" text-anchor="middle" font-size="16" font-weight="bold" fill="#78501b">${i+1}</text><text x="104" y="${y+31}" font-size="21" font-weight="bold" fill="#211c18">${esc(p.name).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</text><text x="104" y="${y+52}" font-size="13" fill="#786b5c">${esc(p.role||'Player')} · Avg ${Number(p.avg).toFixed(1)}</text><text x="835" y="${y+42}" text-anchor="end" font-size="23" font-family="Georgia" font-weight="bold" fill="#9d5a0d">SR: ${Number(p.sr).toFixed(0)}</text>`}).join('')}<text x="44" y="${190+selected.length*82}" font-size="12" fill="#8a7f70">OG Dominators · Hyderabad · Verify stats against CricHeroes scorecards</text></svg>`;
+let blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='og-dominators-batting-lineup.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function sharePoster(){let chosen=players.filter(p=>p.selected);let text='🏏 OG DOMINATORS — BATTING ORDER\n'+($('match').value.trim()||'Match squad')+' · '+$('format').value+'\n\n'+chosen.map((p,i)=>`${i+1}. ${p.name} — SR ${Number(p.sr).toFixed(0)} | Avg ${Number(p.avg).toFixed(1)}`).join('\n');if(navigator.share){navigator.share({title:'OG Dominators batting lineup',text}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>alert('Lineup text copied. Paste it into WhatsApp.')).catch(()=>prompt('Copy lineup text:',text))}else prompt('Copy lineup text:',text)}
+$('match').addEventListener('input',render);$('format').addEventListener('change',render);render();
+</script>
+</body>
+</html>
